@@ -1,100 +1,147 @@
+
+Index · HTML
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ATH Studios | n8n Automation Projects</title>
+<title>ATH Studios | Live n8n Automation Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fafaf7;--card:#fff;--text:#1c1c1a;--muted:#66665f;--line:#e4e3dc;--accent:#e8590c;--on:#d7f5e3;--off:#fde2e2;color-scheme:light}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#1f1f1d;--text:#f1f0ea;--muted:#a3a29a;--line:#33332f;--on:#12351f;--off:#3d1818;color-scheme:dark}}
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#0a0a0f;--bg2:#12121a;--card:#161621;--line:#2a2a3a;--text:#f3efe6;--muted:#a19f98;--gold:#d4af37;--gold2:#f2d77b;--on:#16361f;--off:#3d1717;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
-.wrap{max-width:900px;margin:0 auto;padding:24px 16px 56px}
-h1{font-size:2.2rem;margin:.2em 0}
-h2{margin:2em 0 .6em;font-size:1.4rem}
-p{color:var(--muted)}
-.badge{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--line);font-size:.85rem;color:var(--text)}
-.badge.on{background:var(--on)}.badge.off{background:var(--off)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:var(--text);display:block}
-.card h3{margin:0 0 6px;font-size:1.05rem}.card p{margin:0}
-.card:hover{border-color:var(--accent)}
-.btn{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:1rem}
-a.disabled{pointer-events:none;opacity:.45}
-#msgs{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;min-height:180px;max-height:360px;overflow-y:auto}
-.me{text-align:right;margin:8px 0;color:var(--accent)}
-.bot{margin:8px 0;white-space:pre-wrap}
-form.row{display:flex;gap:8px;margin-top:10px}
-input#q{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:1rem}
-ol{padding-left:20px;color:var(--muted)}ol li{margin:8px 0}ol b{color:var(--text)}
-footer{margin-top:48px;color:var(--muted);font-size:.85rem}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(900px 500px at 80% -10%,#2a2210 0%,transparent 60%),radial-gradient(700px 500px at 0% 20%,#171a33 0%,transparent 60%),var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:"Playfair Display",Georgia,serif;margin:0}
+.gold{background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+.logo{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:1.2rem;letter-spacing:.04em}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--bg2);border:1px solid var(--line);font-size:.82rem}
+.badge:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.badge.on{background:var(--on);border-color:#2c6b40}.badge.on:before{background:#4ade80;box-shadow:0 0 8px #4ade80}
+.badge.off{background:var(--off);border-color:#6b2c2c}.badge.off:before{background:#f87171}
+.hero{padding:56px 0 40px;text-align:center}
+.eyebrow{color:var(--gold);letter-spacing:.25em;text-transform:uppercase;font-size:.75rem;font-weight:600}
+.hero h1{font-size:clamp(2.4rem,7vw,4.4rem);line-height:1.08;margin:14px 0}
+.hero p{max-width:620px;margin:0 auto 26px;color:var(--muted);font-size:1.08rem}
+.btn{display:inline-block;padding:12px 24px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1405;font-weight:600;text-decoration:none;border:0;cursor:pointer;font-size:1rem;font-family:inherit}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+a.disabled{pointer-events:none;opacity:.4}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:36px 0 0}
+.stat{border:1px solid var(--line);background:rgba(22,22,33,.7);border-radius:16px;padding:16px;text-align:center}
+.stat b{display:block;font-family:"Playfair Display",Georgia,serif;font-size:1.8rem;color:var(--gold)}
+.stat span{color:var(--muted);font-size:.85rem}
+section{padding:44px 0}
+.sec-h{margin-bottom:22px}.sec-h h2{font-size:clamp(1.6rem,4vw,2.2rem)}.sec-h p{color:var(--muted);margin:6px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:18px;padding:22px;color:var(--text);text-decoration:none;display:block;transition:.25s}
+a.card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 30px rgba(212,175,55,.12)}
+.card h3{font-size:1.2rem;margin-bottom:6px}.card p{margin:0;color:var(--muted);font-size:.95rem}
+.ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(212,175,55,.12);color:var(--gold);font-size:1.2rem;margin-bottom:14px}
+#msgs{border:1px solid var(--line);background:var(--bg2);border-radius:18px;padding:16px;min-height:200px;max-height:380px;overflow-y:auto}
+.me,.bot{margin:10px 0;padding:10px 14px;border-radius:14px;max-width:85%;white-space:pre-wrap}
+.me{margin-left:auto;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1405}
+.bot{background:var(--card);border:1px solid var(--line)}
+form.row{display:flex;gap:10px;margin-top:12px}
+input#q{flex:1;padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--text);font-size:1rem;font-family:inherit}
+input#q:focus{outline:none;border-color:var(--gold)}
+.note{color:var(--muted);font-size:.85rem;margin-top:12px}
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}
+.node{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px 16px;text-align:center;font-size:.9rem}
+.node small{display:block;color:var(--muted)}.node.hl{border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,175,55,.3)}
+.arrow{color:var(--gold)}
+.steps{counter-reset:s;display:grid;gap:12px}
+.step{counter-increment:s;display:flex;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.step:before{content:counter(s);flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:"Playfair Display",Georgia,serif;font-weight:700;color:#1a1405;background:linear-gradient(135deg,var(--gold),var(--gold2))}
+.step h3{font-size:1.05rem;margin-bottom:2px}.step p{margin:0;color:var(--muted);font-size:.93rem}
+.tag{display:inline-block;margin-top:6px;font-size:.72rem;color:var(--gold);border:1px solid rgba(212,175,55,.4);border-radius:999px;padding:2px 10px}
+.dl{display:flex;justify-content:space-between;align-items:center;gap:10px}.dl span{color:var(--gold);font-size:.85rem}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:28px 0 40px;text-align:center;color:var(--muted);font-size:.85rem}
 </style>
 </head>
 <body>
 <div class="wrap">
-
-<header>
+ 
+<nav>
+  <div class="logo"><span class="gold">ATH</span> Studios</div>
   <span class="badge" id="status">Checking…</span>
-  <h1>ATH Studios</h1>
-  <p>Live automation projects built with n8n: apply for a job, get your CV reviewed by AI, and ask an HR assistant. Everything below runs on real workflows, not a demo.</p>
+</nav>
+ 
+<header class="hero">
+  <div class="eyebrow">Live automation portfolio</div>
+  <h1>Hiring and HR, <span class="gold">automated end to end</span></h1>
+  <p>Apply for a job, get your CV reviewed by AI, or ask an HR assistant about company policy. Every click runs a real n8n workflow, live, not a demo.</p>
+  <a class="btn" href="#try">Try it live</a> <a class="btn ghost" href="#how">How it works</a>
+  <div class="stats">
+    <div class="stat"><b>6</b><span>n8n workflows</span></div>
+    <div class="stat"><b>AI</b><span>CV scoring and coaching</span></div>
+    <div class="stat"><b>RAG</b><span>Policy-grounded chat</span></div>
+    <div class="stat"><b>24/7</b><span>Error monitoring</span></div>
+  </div>
 </header>
-
+ 
 <section>
-  <h2>Choose what you want</h2>
+  <div class="sec-h"><h2>Choose what you want</h2><p>One card per action, each leads to the live tool.</p></div>
   <div class="grid">
-    <a class="card" href="#ask"><h3>Ask HR</h3><p>Chat with an assistant that answers from company policy documents.</p></a>
-    <a class="card" href="#try"><h3>Get coached</h3><p>Send your CV and a job post, get a coaching report by email.</p></a>
-    <a class="card" href="#try"><h3>Apply for a job</h3><p>Submit a PDF CV through the intake form.</p></a>
+    <a class="card" href="#ask"><div class="ico">💬</div><h3>Ask HR</h3><p>Questions answered only from the company's policy documents, with the source named.</p></a>
+    <a class="card" href="#try"><div class="ico">🎯</div><h3>Get coached</h3><p>Send your CV and a job post, receive a coaching report by email.</p></a>
+    <a class="card" href="#try"><div class="ico">📄</div><h3>Apply for a job</h3><p>Submit a PDF CV. It is validated, saved to Drive and logged to a sheet.</p></a>
   </div>
 </section>
-
-<section id="ask">
-  <h2>Try it: Ask HR</h2>
-  <div id="msgs" aria-live="polite"></div>
-  <form class="row" id="ask-form">
-    <input id="q" placeholder="How many leave days do I get?" required autocomplete="off">
-    <button class="btn" style="margin:0">Ask</button>
-  </form>
-</section>
-
+ 
 <section id="try">
-  <h2>Try it: Forms</h2>
-  <div class="grid">
-    <div class="card"><h3>Apply for a Job</h3><p>Upload your CV as a PDF. It is validated, saved and logged.</p>
-      <a class="btn" id="applyLink" target="_blank" rel="noopener">Open form</a></div>
-    <div class="card"><h3>Job Application Form</h3><p>Receive a CV coaching report against a job post.</p>
-      <a class="btn" id="coachLink" target="_blank" rel="noopener">Open form</a></div>
+  <div class="sec-h"><h2>Try it</h2><p>Connected straight to the real workflows.</p></div>
+  <div id="ask">
+    <div id="msgs" aria-live="polite"></div>
+    <form class="row" id="ask-form">
+      <input id="q" placeholder="How many leave days do I get?" required autocomplete="off">
+      <button class="btn">Ask</button>
+    </form>
   </div>
-  <p style="font-size:.85rem">The first time, ngrok may show a warning page. Click <b>Visit Site</b>.</p>
+  <div class="grid" style="margin-top:22px">
+    <div class="card"><h3>Apply for a Job</h3><p>Upload your CV as a PDF and submit your application.</p><p style="margin-top:14px"><a class="btn" id="applyLink" target="_blank" rel="noopener">Open form</a></p></div>
+    <div class="card"><h3>Job Application Form</h3><p>Get a CV coaching report against a job post.</p><p style="margin-top:14px"><a class="btn" id="coachLink" target="_blank" rel="noopener">Open form</a></p></div>
+  </div>
+  <p class="note">The first time, ngrok may show a warning page. Click <b>Visit Site</b> to continue.</p>
 </section>
-
-<section>
-  <h2>How it works</h2>
-  <ol>
-    <li><b>Applying to Job:</b> a form takes the application and CV, checks it, and stores it.</li>
-    <li><b>Cv Review:</b> AI reads a CV against a job post and emails a coaching report.</li>
-    <li><b>Rag + Policy Loader:</b> policy documents are loaded into a knowledge base; the chat answers only from them.</li>
-    <li><b>Ai Action:</b> AI-powered processing of the recruitment flow.</li>
-    <li><b>Error Handeling:</b> failures are logged and reported so nothing breaks silently.</li>
-  </ol>
-</section>
-
-<section>
-  <h2>Download</h2>
-  <div class="grid">
-    <a class="card" href="workflows/Applying%20to%20Job.json" download><h3>Applying to Job</h3></a>
-    <a class="card" href="workflows/Cv%20Review.json" download><h3>Cv Review</h3></a>
-    <a class="card" href="workflows/Rag.json" download><h3>Rag</h3></a>
-    <a class="card" href="workflows/Policy%20Loader.json" download><h3>Policy Loader</h3></a>
-    <a class="card" href="workflows/Ai%20Action.json" download><h3>Ai Action</h3></a>
-    <a class="card" href="workflows/Error%20Handeling.json" download><h3>Error Handeling</h3></a>
+ 
+<section id="how">
+  <div class="sec-h"><h2>How it works</h2><p>Visitors reach the real n8n only through one fixed address.</p></div>
+  <div class="flow">
+    <div class="node">Visitor<small>browser or phone</small></div><span class="arrow">→</span>
+    <div class="node">Website<small>GitHub Pages</small></div><span class="arrow">→</span>
+    <div class="node">ngrok<small>fixed https URL</small></div><span class="arrow">→</span>
+    <div class="node hl">n8n (Docker)<small>workflows + credentials</small></div><span class="arrow">→</span>
+    <div class="node">Google + AI<small>Sheets, Drive, Gmail, LLMs</small></div>
+  </div>
+  <div class="steps" style="margin-top:26px">
+    <div class="step"><div><h3>Applying to Job</h3><p>Candidates apply with a PDF CV. It is validated, saved to Drive and logged to a sheet.</p><span class="tag">Form</span></div></div>
+    <div class="step"><div><h3>Ai Action</h3><p>Reads new applications, scores each CV with AI and sends invites or declines.</p><span class="tag">Automated</span></div></div>
+    <div class="step"><div><h3>Cv Review</h3><p>Reads a CV against a job post and emails a coaching report.</p><span class="tag">Form</span></div></div>
+    <div class="step"><div><h3>Rag + Policy Loader</h3><p>Policies from Google Drive are loaded into a knowledge base. The chat answers only from them.</p><span class="tag">Chat · On start, daily, manual</span></div></div>
+    <div class="step"><div><h3>Error Handeling</h3><p>Logs failures and sends alerts so no run fails silently.</p><span class="tag">Error trigger</span></div></div>
   </div>
 </section>
-
-<footer>© ATH Studios · Built with n8n, Docker, ngrok and GitHub Pages. Live only while the host machine is online.</footer>
+ 
+<section>
+  <div class="sec-h"><h2>Download</h2><p>Cleaned workflow files, ready to import into your own n8n. Add your own credentials and IDs.</p></div>
+  <div class="grid">
+    <a class="card dl" href="workflows/Applying%20to%20Job.json" download><h3>Applying to Job</h3><span>.json ↓</span></a>
+    <a class="card dl" href="workflows/Ai%20Action.json" download><h3>Ai Action</h3><span>.json ↓</span></a>
+    <a class="card dl" href="workflows/Cv%20Review.json" download><h3>Cv Review</h3><span>.json ↓</span></a>
+    <a class="card dl" href="workflows/Rag.json" download><h3>Rag</h3><span>.json ↓</span></a>
+    <a class="card dl" href="workflows/Policy%20Loader.json" download><h3>Policy Loader</h3><span>.json ↓</span></a>
+    <a class="card dl" href="workflows/Error%20Handeling.json" download><h3>Error Handeling</h3><span>.json ↓</span></a>
+  </div>
+</section>
+ 
+<footer>© ATH Studios · Built with n8n, Docker, ngrok and GitHub Pages<br>Live only while the host machine is online.</footer>
 </div>
-
+ 
 <script>
 const CONFIG = {
   n8nBase: "https://untie-debtor-thaw.ngrok-free.dev",
@@ -107,7 +154,7 @@ const sessionId = crypto.randomUUID();
 const HEADERS = { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" };
 $("#applyLink").href = CONFIG.n8nBase + CONFIG.applyForm;
 $("#coachLink").href = CONFIG.n8nBase + CONFIG.coachForm;
-
+ 
 function setStatus(online) {
   $("#status").textContent = online ? "Online" : "Offline, please try again later";
   $("#status").className = "badge " + (online ? "on" : "off");
@@ -122,13 +169,14 @@ async function checkStatus() {
 }
 checkStatus();
 setInterval(checkStatus, 60000);
-
+ 
 function add(cls, text) {
   const d = document.createElement("div");
   d.className = cls; d.textContent = text;
   $("#msgs").append(d); $("#msgs").scrollTop = $("#msgs").scrollHeight;
   return d;
 }
+add("bot", "Hi! Ask me anything about company HR policies.");
 $("#ask-form").onsubmit = async e => {
   e.preventDefault();
   const q = $("#q").value.trim(); if (!q) return;
@@ -149,3 +197,4 @@ $("#ask-form").onsubmit = async e => {
 </script>
 </body>
 </html>
+ 
