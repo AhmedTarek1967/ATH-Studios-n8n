@@ -1,0 +1,287 @@
+{
+  "name": "Rag",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Upload Knowledge base",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "files",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -304,
+        1680
+      ],
+      "id": "2eed4f46-1dfc-4858-b099-430065bc9f39",
+      "name": "On form submission",
+      "webhookId": "2090c8fb-d661-4383-8048-ad15c2fe7f3a"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "hr_policies",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        1680
+      ],
+      "id": "83bd4b75-eeca-4afd-8ba5-53855a13ccb1",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        1920
+      ],
+      "id": "15ec9bb9-e0d1-43f9-beb2-3f84067ea336",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        144,
+        2128
+      ],
+      "id": "5c715473-c0b0-4f32-a601-7afab78ba4a2",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        1920
+      ],
+      "id": "1266e3a2-f4e5-4cb1-a6ca-c8222a2b991e",
+      "name": "Embeddings Google Gemini"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {
+          "allowedOrigins": "https://github.com/AhmedTarek1967"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -304,
+        1040
+      ],
+      "id": "a1881cb4-9f62-4554-b46f-5046f7e1832b",
+      "name": "When chat message received",
+      "webhookId": "b0b5fad5-f022-4864-ab7c-cf66b8599c10"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "answer only from memory",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -16,
+        832
+      ],
+      "id": "60f6e08b-a590-4f11-a595-6d53b843ea57",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 6
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        64,
+        1072
+      ],
+      "id": "abfd5c66-717d-47a3-ad6c-c649df124320",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Horizon Byte HR and IT policies: work hours, leave, remote work, salary, expenses, training, resignation, passwords, devices, software, AI tools, and security incidents.",
+        "memoryKey": {
+          "__rl": true,
+          "value": "hr_policies",
+          "mode": "list",
+          "cachedResultName": "hr_policies"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        1072
+      ],
+      "id": "f6dd5a16-f6af-4bb7-96ca-d62ef1e9a233",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        272,
+        1280
+      ],
+      "id": "0799f2bd-6cb2-4ecb-925a-2b2b3fa88742",
+      "name": "Embeddings Google Gemini1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        1072
+      ],
+      "id": "f2c009cb-a0f5-4654-bef0-7bb3c4414cc2",
+      "name": "Google Gemini Chat Model"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "I86CzV3Qu0HLoW5v",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "nodeGroups": []
+}

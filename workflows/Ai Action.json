@@ -1,0 +1,1574 @@
+{
+  "name": "Ai Action",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "b1e8e4a6-140f-46bb-904a-e983958f683c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "new"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        48
+      ],
+      "id": "be5c35d4-d121-4914-9c46-c6b0af35d1c4",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.CvFileId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        800,
+        128
+      ],
+      "id": "433ae036-c04b-4f7b-88e3-6e69277b4e51",
+      "name": "Download file",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "56a4bcc8-55dd-4600-b806-a4e9f8768eb2",
+              "name": "Applied At",
+              "value": "={{ $('Get row(s) in sheet').item.json['Applied At'] }}",
+              "type": "string"
+            },
+            {
+              "id": "549fc6dd-78a1-4643-ad2c-ffd1c4d41d8c",
+              "name": "Name",
+              "value": "={{ $('Get row(s) in sheet').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "ba430c01-bb0d-48af-918f-b988e9c29036",
+              "name": "Email",
+              "value": "={{ $('Get row(s) in sheet').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "c7259df4-9988-4354-95e3-d388bb60f011",
+              "name": "Position",
+              "value": "={{ $('Get row(s) in sheet').item.json.Position }}",
+              "type": "string"
+            },
+            {
+              "id": "0882a277-869f-4fe0-9d13-ad3b75aa73bd",
+              "name": "Motivation",
+              "value": "={{ $('Get row(s) in sheet').item.json.Motivation }}",
+              "type": "string"
+            },
+            {
+              "id": "ede53b77-696f-406c-9c62-158c7415b3ae",
+              "name": "CV File ID",
+              "value": "={{ $('Get row(s) in sheet').item.json['CV File ID'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2324e59b-3b1e-4135-ad4a-b416ad980a6b",
+              "name": "cvText",
+              "value": "={{ $json.cvText }}",
+              "type": "string"
+            },
+            {
+              "id": "fb0582b9-0253-433c-aacf-690afbb5c745",
+              "name": "readMethod",
+              "value": "={{ $json.readMethod }}",
+              "type": "string"
+            },
+            {
+              "id": "14426b78-69e5-4b74-9044-d266cb00522a",
+              "name": "jobRequirement",
+              "value": "={{ ({   \"AI Automation Engineer (Junior)\": \"Build n8n automation workflows; integrate LLM APIs (OpenAI, Gemini, Groq); build RAG chatbots; Python or JavaScript; REST APIs, JSON and webhooks; prompt engineering; Bachelor's in CS/AI or related; Arabic and English. Nice to have: vector databases, Docker, SQL.\",   \"Data Analyst\": \"2+ years of data analysis; advanced SQL; Excel (pivot tables, lookups); Power BI or Tableau dashboards; Python with pandas; basic statistics; presenting insights to managers; Bachelor's in a quantitative field. Nice to have: dbt, Google Analytics.\",   \"Customer Support Specialist\": \"1+ year in customer support; fluent Arabic and English (written and spoken); experience with a help-desk tool such as Zendesk, Freshdesk or HubSpot; clear written communication; problem solving and patience; willingness to work shifts. Nice to have: technical or SaaS product support.\" })[$('Current Application').first().json.Position] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1984,
+        -224
+      ],
+      "id": "97700fa3-51d9-400b-8263-84091f8b1da3",
+      "name": "Prepare Application"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a41f908-4c9a-4aef-b5ec-5427dba342f8",
+              "name": "cvText",
+              "value": "={{ $json.content.parts.map(p => p.text).join(\"\\n\") }}",
+              "type": "string"
+            },
+            {
+              "id": "01c6a903-a117-4b13-9db1-f945e2b17a0a",
+              "name": "readMethod",
+              "value": "OCR With Gemini",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1776,
+        -96
+      ],
+      "id": "eaaa0313-b9b9-43fa-acf4-e76878ab3a36",
+      "name": "CV Text (OCR)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "07c3703a-cf65-4b2c-bd4f-c8353f2ff6ca",
+              "leftValue": "={{ $json.text.length}}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        -96
+      ],
+      "id": "dece5b69-65af-4664-8e0b-870a9523dbaf",
+      "name": "Readable Pdf"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "text": "Transcribe all data is this CV as written, section by section and return Only transcribed data.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "99280f2b-82e5-4876-b841-716b19549c4f",
+      "name": "OCR Scanned CV",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {
+          "keepSource": "both"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        -96
+      ],
+      "id": "7ae5399b-3fbf-4055-9284-642c783e2cca",
+      "name": "Extract CV Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4d3d8d9-e667-49bb-aa03-75c859d0f34b",
+              "name": "Applied At",
+              "value": "={{ $json[\"Applied At\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "2d9413b1-6107-4203-8706-a97a025a96fd",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "c77bc0bd-54a4-4099-a09b-562186ecc042",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "41d79d78-6278-4719-8a23-64fb0bbb8685",
+              "name": "Position",
+              "value": "={{ $json.Position }}",
+              "type": "string"
+            },
+            {
+              "id": "e8139e31-9dcb-4a7a-b442-c37dd86acac5",
+              "name": "Motivation",
+              "value": "={{ $json.Motivation }}",
+              "type": "string"
+            },
+            {
+              "id": "2cd5bdaa-3453-4edc-8dc8-392df3caf1d2",
+              "name": "CvFileId",
+              "value": "={{ $json[\"CV File ID\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        144
+      ],
+      "id": "e030c0e6-e399-43e8-a752-690a7be1f645",
+      "name": "Current Application"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        352,
+        48
+      ],
+      "id": "9a1cb12c-9b42-4873-97a1-81a7028a398e",
+      "name": "Loop Over Application"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d4c8a4f-9cad-4c5b-8440-4be8ca58f82e",
+              "name": "cvText",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "e71fa1b5-c7f2-4c22-ab6b-c8f4d3de3cbf",
+              "name": "readMethod",
+              "value": "PDF Text",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1696,
+        -320
+      ],
+      "id": "dd3b2f54-3291-424f-8d07-47f00538211b",
+      "name": "CV Text (PDF)"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.cvText }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"Applied At\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Date when the candidate applied for the job.\"\n    },\n    \"name\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Candidate's full name.\"\n    },\n    \"position\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Job position the candidate is applying for or their desired position.\"\n    },\n    \"experience\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"years\": {\n          \"type\": [\"number\", \"null\"],\n          \"description\": \"Total years of professional work experience.\"\n        },\n        \"summary\": {\n          \"type\": [\"string\", \"null\"],\n          \"description\": \"Summary of professional experience.\"\n        },\n        \"details\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Previous jobs, companies, roles and responsibilities.\"\n        }\n      },\n      \"required\": [\"years\", \"summary\", \"details\"],\n      \"additionalProperties\": false\n    },\n    \"email\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Candidate's email address.\"\n    },\n    \"phone\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Candidate's phone number with country code if available.\"\n    },\n    \"profile\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Professional profile or summary.\"\n    },\n    \"education\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Degrees, universities, fields of study and graduation years.\"\n    },\n    \"skills\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Technical and soft skills.\"\n    },\n    \"languages\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Languages and proficiency levels.\"\n    },\n    \"certificates\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Certificates, issuing organizations and dates.\"\n    }\n  },\n  \"required\": [\n    \"appliedAt\",\n    \"name\",\n    \"position\",\n    \"experience\",\n    \"email\",\n    \"phone\",\n    \"profile\",\n    \"education\",\n    \"skills\",\n    \"languages\",\n    \"certificates\"\n  ],\n  \"additionalProperties\": false\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        2144,
+        -224
+      ],
+      "id": "a20c5c1c-a437-4c62-a5f5-6b257557ef79",
+      "name": "Information Extractor",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        -32
+      ],
+      "id": "ba4f245a-7edb-48cf-b166-8d61fbc7a409",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2496,
+        -256
+      ],
+      "id": "6eeb6258-149c-4974-9265-506f33caeff3",
+      "name": "Scoring Model"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an experienced Technical Recruiter and Candidate Evaluation Specialist.\n\nYour task is to evaluate a candidate against a specific job description and requirements, then recommend one of exactly three hiring decisions:\n\n1. Interview\n2. Maybe\n3. Declined\n\n## INPUT DATA\n\n### JOB REQUIREMENTS\n{{ JSON.stringify($('Prepare Application').item.json.jobRequirement) }}\n\n### CANDIDATE INFORMATION\n{{ JSON.stringify($json.output) }}\n\n## EVALUATION CRITERIA\n\nEvaluate the candidate using these weighted criteria:\n\n### A. Required Skills Match – 30 points\n- Compare candidate skills against required and preferred skills.\n- Prioritize essential technical skills.\n- Distinguish between listed skills and demonstrated practical experience.\n\n### B. Relevant Work Experience – 25 points\n- Evaluate previous employment, internships, and responsibilities.\n- Prioritize experience relevant to the target position.\n- Consider the seniority of the job.\n- Do not invent missing experience duration.\n\n### C. Projects & Practical Implementation – 15 points\n- Evaluate relevant projects.\n- Consider technical complexity, tools, technologies, and implementation.\n- Reward measurable achievements.\n\n### D. Education – 10 points\n- Evaluate degree, major, and relevance to the position.\n\n### E. Certifications – 5 points\n- Evaluate relevant professional certifications.\n\n### F. Languages – 5 points\n- Compare language proficiency with job requirements.\n\n### G. Additional Qualifications – 10 points\n- Consider other relevant technical knowledge, achievements, and qualifications.\n\n## SCORING RULES\n\n- Maximum score: 100.\n- Score each criterion independently.\n- Calculate the total from the individual criteria.\n- Never invent candidate qualifications.\n- Missing information is not automatically evidence of a lack of ability.\n- Do not penalize junior candidates for lacking senior-level experience.\n- Do not use age, gender, nationality, religion, disability, or other protected characteristics.\n- Do not use contact information or application date when calculating scores.\n\n## HIRING DECISION RULES\n\nChoose ONLY one of these three decisions:\n\n### INTERVIEW\n- Score: 75–100.\n- Candidate demonstrates strong alignment with essential job requirements.\n- No major gaps in critical skills.\n- Candidate should proceed to an interview.\n\n### MAYBE\n- Score: 50–74.\n- Candidate demonstrates partial alignment.\n- Candidate has potential but requires additional verification.\n- Missing information or some skill gaps may need clarification.\n\n### DECLINED\n- Score: 0–49.\n- Candidate demonstrates insufficient alignment with essential job requirements.\n- Significant gaps exist in critical requirements.\n- The decision must be supported by clear evidence, not merely missing CV information.\n\nImportant:\n- The score thresholds are guidelines.\n- A critical mandatory requirement may justify a Declined recommendation even with a higher overall score, but only when the CV provides clear evidence that the requirement is not met.\n- If a critical requirement cannot be verified, prefer Maybe rather than assuming failure.\n- Never automatically reject candidates based on score alone.\n\n## OUTPUT FORMAT\n\nReturn ONLY valid JSON:\n\n{\n  \"candidate_name\": \"\",\n  \"applied_position\": \"\",\n  \"applied_at\": null,\n  \"score\": 0,\n  \"classification\": \"\",\n  \"recommendation\": \"Interview / Maybe / Declined\",\n  \"decision_reason\": \"\",\n  \"criteria_scores\": {\n    \"required_skills\": {\n      \"score\": 0,\n      \"max_score\": 30,\n      \"reason\": \"\"\n    },\n    \"experience\": {\n      \"score\": 0,\n      \"max_score\": 25,\n      \"reason\": \"\"\n    },\n    \"projects\": {\n      \"score\": 0,\n      \"max_score\": 15,\n      \"reason\": \"\"\n    },\n    \"education\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    },\n    \"certifications\": {\n      \"score\": 0,\n      \"max_score\": 5,\n      \"reason\": \"\"\n    },\n    \"languages\": {\n      \"score\": 0,\n      \"max_score\": 5,\n      \"reason\": \"\"\n    },\n    \"additional_qualifications\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    }\n  },\n  \"matched_requirements\": [],\n  \"partially_matched_requirements\": [],\n  \"missing_requirements\": [],\n  \"strengths\": [],\n  \"weaknesses\": [],\n  \"experience_summary\": \"\",\n  \"interview_questions\": [],\n  \"evaluation_confidence\": \"High / Medium / Low\"\n}\n\n## CLASSIFICATION\n\nUse these exact values:\n\n- 75–100: Strong Match\n- 50–74: Partial Match\n- 0–49: Low Match\n\n## FINAL VALIDATION\n\nBefore returning the result:\n\n1. Ensure all criterion scores are within their maximum limits.\n2. Calculate the total score correctly.\n3. Ensure the classification matches the total score.\n4. Ensure the recommendation is exactly Interview, Maybe, or Declined.\n5. Ensure the recommendation is consistent with the evidence and job requirements.\n6. Return valid JSON only.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2528,
+        -416
+      ],
+      "id": "d0d4a18a-3462-49f7-ba2b-d529ced42a64",
+      "name": "Score Candidate",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"candidate_name\": \"\",\n  \"job_position\": \"\",\n  \"score\": 0,\n  \"classification\": \"\",\n  \"criteria_scores\": {\n    \"technical_skills\": {\n      \"score\": 0,\n      \"max_score\": 30,\n      \"reason\": \"\"\n    },\n    \"experience\": {\n      \"score\": 0,\n      \"max_score\": 25,\n      \"reason\": \"\"\n    },\n    \"education\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    },\n    \"certifications\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    },\n    \"projects\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    },\n    \"languages\": {\n      \"score\": 0,\n      \"max_score\": 10,\n      \"reason\": \"\"\n    },\n    \"additional_qualifications\": {\n      \"score\": 0,\n      \"max_score\": 5,\n      \"reason\": \"\"\n    }\n  },\n  \"matched_requirements\": [],\n  \"missing_requirements\": [],\n  \"strengths\": [],\n  \"weaknesses\": [],\n  \"recommendation\": \"\",\n  \"interview_questions\": [],\n  \"evaluation_confidence\": \"\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2608,
+        -224
+      ],
+      "id": "1fbdef46-fd94-4513-96e7-8237709b395b",
+      "name": "Evaluation Schema (Auto-Fix)"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2736,
+        -96
+      ],
+      "id": "572a13cb-20a0-457b-b638-214b3afc9fef",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst input = $json;\n\n// Scoring criteria\nconst weights = {\n  required_skills: 30,\n  experience: 25,\n  projects: 15,\n  education: 10,\n  certifications: 5,\n  languages: 5,\n  additional_qualifications: 10\n};\n\n// Decision rules\nfunction getDecision(score) {\n  if (score >= 75) return \"Interview\";\n  if (score >= 50) return \"Maybe\";\n  return \"Declined\";\n}\n\nfunction getClassification(score) {\n  if (score >= 75) return \"Strong Match\";\n  if (score >= 50) return \"Partial Match\";\n  return \"Low Match\";\n}\n\nconst errors = [];\nconst warnings = [];\n\n// 1. Extract LLM response\nlet evaluation =\n  input.evaluation ??\n  input.output ??\n  input.text ??\n  input.response ??\n  input;\n\n// 2. Parse JSON\nif (typeof evaluation === \"string\") {\n  try {\n    evaluation = evaluation\n      .replace(/```json\\s*/gi, \"\")\n      .replace(/```/g, \"\")\n      .trim();\n\n    evaluation = JSON.parse(evaluation);\n  } catch (error) {\n    return {\n      json: {\n        isValid: false,\n        validationStatus: \"FAILED\",\n        errors: [\"Invalid JSON returned by LLM.\"],\n        warnings: [],\n        rawOutput: evaluation\n      }\n    };\n  }\n}\n\n// 3. Validate object\nif (\n  !evaluation ||\n  typeof evaluation !== \"object\" ||\n  Array.isArray(evaluation)\n) {\n  return {\n    json: {\n      isValid: false,\n      validationStatus: \"FAILED\",\n      errors: [\"Evaluation must be a JSON object.\"]\n    }\n  };\n}\n\n// 4. Required fields\nconst requiredFields = [\n  \"candidate_name\",\n  \"applied_position\",\n  \"score\",\n  \"classification\",\n  \"recommendation\",\n  \"criteria_scores\",\n  \"decision_reason\",\n  \"matched_requirements\",\n  \"partially_matched_requirements\",\n  \"missing_requirements\",\n  \"strengths\",\n  \"weaknesses\",\n  \"experience_summary\",\n  \"interview_questions\",\n  \"evaluation_confidence\"\n];\n\nfor (const field of requiredFields) {\n  if (\n    evaluation[field] === undefined ||\n    evaluation[field] === null\n  ) {\n    errors.push(`Missing required field: ${field}`);\n  }\n}\n\n// 5. Validate candidate information\nif (\n  typeof evaluation.candidate_name !== \"string\" ||\n  !evaluation.candidate_name.trim()\n) {\n  errors.push(\"Invalid candidate name.\");\n}\n\nif (\n  typeof evaluation.applied_position !== \"string\" ||\n  !evaluation.applied_position.trim()\n) {\n  errors.push(\"Invalid applied position.\");\n}\n\n// 6. Validate criteria and calculate score\nlet calculatedScore = 0;\nlet criteriaValid = true;\n\nif (\n  !evaluation.criteria_scores ||\n  typeof evaluation.criteria_scores !== \"object\"\n) {\n  errors.push(\"Invalid criteria_scores.\");\n  criteriaValid = false;\n} else {\n  for (const [criterion, maxScore] of Object.entries(weights)) {\n    const item = evaluation.criteria_scores[criterion];\n\n    if (!item || typeof item !== \"object\") {\n      errors.push(`Missing criterion: ${criterion}`);\n      criteriaValid = false;\n      continue;\n    }\n\n    if (\n      typeof item.score !== \"number\" ||\n      !Number.isFinite(item.score) ||\n      item.score < 0 ||\n      item.score > maxScore\n    ) {\n      errors.push(\n        `Invalid score for ${criterion}. Allowed: 0-${maxScore}.`\n      );\n      criteriaValid = false;\n      continue;\n    }\n\n    if (item.max_score !== maxScore) {\n      warnings.push(\n        `${criterion}: max_score corrected to ${maxScore}.`\n      );\n      item.max_score = maxScore;\n    }\n\n    if (\n      typeof item.reason !== \"string\" ||\n      !item.reason.trim()\n    ) {\n      warnings.push(`Missing reason for ${criterion}.`);\n    }\n\n    calculatedScore += item.score;\n  }\n}\n\n// 7. Recalculate total score\nif (criteriaValid) {\n  calculatedScore = Math.round(calculatedScore * 100) / 100;\n\n  if (evaluation.score !== calculatedScore) {\n    warnings.push(\n      `Score corrected from ${evaluation.score} to ${calculatedScore}.`\n    );\n  }\n\n  evaluation.score = calculatedScore;\n} else {\n  evaluation.score = null;\n}\n\n// 8. Correct classification and recommendation\nif (criteriaValid) {\n  const expectedDecision = getDecision(calculatedScore);\n  const expectedClassification = getClassification(calculatedScore);\n\n  if (evaluation.recommendation !== expectedDecision) {\n    warnings.push(\n      `Recommendation corrected from \"${evaluation.recommendation}\" to \"${expectedDecision}\".`\n    );\n  }\n\n  if (evaluation.classification !== expectedClassification) {\n    warnings.push(\n      `Classification corrected from \"${evaluation.classification}\" to \"${expectedClassification}\".`\n    );\n  }\n\n  evaluation.recommendation = expectedDecision;\n  evaluation.classification = expectedClassification;\n}\n\n// 9. Validate arrays\nconst arrayFields = [\n  \"matched_requirements\",\n  \"partially_matched_requirements\",\n  \"missing_requirements\",\n  \"strengths\",\n  \"weaknesses\",\n  \"interview_questions\"\n];\n\nfor (const field of arrayFields) {\n  if (!Array.isArray(evaluation[field])) {\n    errors.push(`${field} must be an array.`);\n  }\n}\n\n// 10. Validate confidence\nif (\n  ![\"High\", \"Medium\", \"Low\"].includes(\n    evaluation.evaluation_confidence\n  )\n) {\n  errors.push(\"Invalid evaluation_confidence.\");\n}\n\n// 11. Validate decision reason\nif (\n  typeof evaluation.decision_reason !== \"string\" ||\n  !evaluation.decision_reason.trim()\n) {\n  errors.push(\"Missing decision_reason.\");\n}\n\n// 12. Final result\nconst isValid = errors.length === 0 && criteriaValid;\n\nreturn {\n  json: {\n    isValid,\n    validationStatus: isValid ? \"PASSED\" : \"FAILED\",\n    hiringDecision: isValid ? evaluation.recommendation : null,\n    calculatedScore: criteriaValid ? calculatedScore : null,\n    errors,\n    warnings,\n    evaluation\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2992,
+        -512
+      ],
+      "id": "790ab576-ddaf-4bfc-8e17-37bc47f2b30c",
+      "name": "Validate Evaluation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "45b92dad-c110-4b2a-990f-1c5558444a10",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3216,
+        -512
+      ],
+      "id": "6b04c192-eb70-460f-8269-022c103e97f2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.hiringDecision }}",
+                    "rightValue": "Interview",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "197b4406-616d-4c86-9f18-62dfa59d9647"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Interview"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "62f155b1-8dab-406e-aa37-8a41eec6deac",
+                    "leftValue": "={{ $json.hiringDecision }}",
+                    "rightValue": "Maybe",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Maybe"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b862e65b-9703-4564-9875-3f24a3213ae6",
+                    "leftValue": "={{ $json.hiringDecision }}",
+                    "rightValue": "Declined",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Decline"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        3440,
+        -608
+      ],
+      "id": "1c4a8f27-5e31-473b-b8c4-d6a635875ecb",
+      "name": "Desicion"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SENDTO",
+        "subject": "Brief About a Candidate",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>Candidate Brief & Interview Questions</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f4f6f9;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 20px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f4f6f9;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f9; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);\">                      <!-- Header Banner -->           <tr>             <td align=\"center\" style=\"background-color: #0F172A; padding: 36px 20px;\">               <h1 style=\"color: #ffffff; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px;\">Candidate Brief & Assessment</h1>               <p style=\"color: #94A3B8; font-size: 15px; margin: 6px 0 0 0;\">Position: [Job Title]</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 36px 40px; color: #334155;\">               <p style=\"font-size: 16px; line-height: 1.6; margin: 0 function(0) 16px 0; color: #1E293B;\">                 Hi <strong>[HR Name / Team]</strong>,               </p>               <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #475569;\">                 Please find below the brief summary for <strong>[Candidate Name]</strong> who has been evaluated for the <strong>[Job Title]</strong> position.               </p>                <!-- Candidate Summary Card -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; margin: 0 0 24px 0;\">                 <tr>                   <td style=\"padding: 20px;\">                     <p style=\"font-size: 13px; font-weight: 700; text-transform: uppercase; color: #4F46E5; margin: 0 0 12px 0; letter-spacing: 0.5px;\">Candidate Overview</p>                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td style=\"padding: 6px 0; font-size: 14px; color: #64748B; width: 120px;\"><strong>Full Name:</strong></td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #1E293B;\">[Candidate Name]</td>                       </tr>                       <tr>                         <td style=\"padding: 6px 0; font-size: 14px; color: #64748B;\"><strong>Experience:</strong></td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #1E293B;\">[X] Years</td>                       </tr>                       <tr>                         <td style=\"padding: 6px 0; font-size: 14px; color: #64748B;\"><strong>Key Strengths:</strong></td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #1E293B;\">[Strength 1, Strength 2, Strength 3]</td>                       </tr>                       <tr>                         <td style=\"padding: 6px 0; font-size: 14px; color: #64748B;\"><strong>Recommendation:</strong></td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #1E293B;\"><span style=\"background-color: #DCFCE7; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;\">Proceed to Next Round</span></td>                       </tr>                     </table>                   </td>                 </tr>               </table>                <!-- Interview Questions Section -->               <p style=\"font-size: 15px; font-weight: 600; color: #1E293B; margin: 0 0 12px 0;\">Attached Interview Questions & Focus Areas:</p>                              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border-left: 4px solid #4F46E5; border-radius: 4px; margin: 0 0 28px 0;\">                 <tr>                   <td style=\"padding: 16px 20px; font-family: monospace; font-size: 14px; color: #334155; line-height: 1.5;\">                     {{ $json.interviewQestions }}                   </td>                 </tr>               </table>                <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 20px 0; color: #475569;\">                 Let me know if you would like to schedule the next interview or need any additional details.               </p>                <p style=\"font-size: 15px; line-height: 1.6; margin: 28px 0 0 0; color: #1E293B;\">                 Best regards,<br>                 <strong>[Your Name]</strong><br>                 <span style=\"color: #64748B; font-size: 13px;\">[Your Title]</span>               </p>             </td>           </tr>            <!-- Footer -->           <tr>             <td align=\"center\" style=\"background-color: #F8FAFC; padding: 20px; border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 12px;\">               <p style=\"margin: 0;\">Internal HR & Recruitment Department • Confidential</p>             </td>           </tr>          </table>        </td>     </tr>   </table>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3888,
+        -688
+      ],
+      "id": "c3c71d6c-94f3-4a95-9205-58bf47e8355b",
+      "name": "Breif HR",
+      "webhookId": "10907f75-8ed7-4940-b498-e62b97d454db"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Applied Data "
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "CV File ID"
+          ],
+          "schema": [
+            {
+              "id": "Applied At",
+              "displayName": "Applied At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Position",
+              "displayName": "Position",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Motivation",
+              "displayName": "Motivation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CV File ID",
+              "displayName": "CV File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CV Link",
+              "displayName": "CV Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Years Experience",
+              "displayName": "Years Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Top Skills",
+              "displayName": "Top Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Matched",
+              "displayName": "Matched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Missing",
+              "displayName": "Missing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Read Method",
+              "displayName": "Read Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Problems",
+              "displayName": "Problems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Evaluated At",
+              "displayName": "Evaluated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4304,
+        448
+      ],
+      "id": "9a2fe14d-03cc-44b9-a900-fd89dce97690",
+      "name": "Save Result To Sheet"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Extract CV Text').item.json.Email }}",
+        "subject": "DECLINE EMAIL",
+        "message": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3712,
+        -320
+      ],
+      "id": "c30a4e7d-120f-414c-bac1-2caef26bb0cb",
+      "name": "Send Polite Decline",
+      "webhookId": "dafbc58c-afc6-498b-bdd0-d053dc1011d5"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Extract CV Text').item.json.Email }}",
+        "subject": "INTERVIEW EMAIL",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>Interview Invitation</title>   <style>     /* Reset styles for email clients */     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     img {       -ms-interpolation-mode: bicubic;       border: 0;       height: auto;       line-height: 100%;       outline: none;       text-decoration: none;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f4f6f9;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }          /* Responsive styles */     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 24px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f4f6f9;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f9; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);\">                      <!-- Header Banner -->           <tr>             <td align=\"center\" style=\"background-color: #4F46E5; padding: 40px 20px;\">               <h1 style=\"color: #ffffff; font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.5px;\">Interview Invitation</h1>               <p style=\"color: #E0E7FF; font-size: 16px; margin: 8px 0 0 0;\">We’d love to speak with you!</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 40px 48px; color: #334155;\">               <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #1E293B;\">                 Hi <strong>[Candidate Name]</strong>,               </p>               <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; color: #475569;\">                 Thank you for applying for the <strong>[Job Title]</strong> position at <strong>[Company Name]</strong>. We were very impressed with your background and would like to invite you for an interview.               </p>                <!-- Callout Box: Details -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border-left: 4px solid #4F46E5; border-radius: 4px; margin: 0 0 28px 0;\">                 <tr>                   <td style=\"padding: 20px;\">                     <p style=\"font-size: 14px; font-weight: 700; text-transform: uppercase; color: #4F46E5; margin: 0 0 8px 0; letter-spacing: 0.5px;\">Interview Details</p>                     <p style=\"font-size: 15px; color: #334155; margin: 4px 0;\"><strong>Format:</strong> [Virtual / In-Person]</p>                     <p style=\"font-size: 15px; color: #334155; margin: 4px 0;\"><strong>Duration:</strong> Approximately [30 / 45 / 60] minutes</p>                     <p style=\"font-size: 15px; color: #334155; margin: 4px 0;\"><strong>Interviewer:</strong> [Interviewer Name], [Interviewer Title]</p>                   </td>                 </tr>               </table>                <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 28px 0; color: #475569;\">                 Please click the button below to select a date and time that works best for your schedule:               </p>                <!-- CTA Button -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 32px 0;\">                 <tr>                   <td align=\"center\">                     <a href=\"[Scheduling Link]\" target=\"_blank\" style=\"background-color: #4F46E5; color: #ffffff; display: inline-block; font-size: 16px; font-weight: 600; padding: 14px 32px; text-decoration: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);\">Schedule Your Interview</a>                   </td>                 </tr>               </table>                <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 20px 0; color: #64748B;\">                 If none of the available slots work for you, reply directly to this email with a few times you are free, and we will accommodate your availability.               </p>                <p style=\"font-size: 16px; line-height: 1.6; margin: 32px 0 0 0; color: #1E293B;\">                 Best regards,<br>                 <strong>[Your Name]</strong><br>                 <span style=\"color: #64748B; font-size: 14px;\">[Your Title] | [Company Name]</span>               </p>             </td>           </tr>            <!-- Footer -->           <tr>             <td align=\"center\" style=\"background-color: #F8FAFC; padding: 24px; border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 12px;\">               <p style=\"margin: 0 0 8px 0;\">[Company Name] • [Company Address]</p>               <p style=\"margin: 0;\">If you have any questions prior to the interview, feel free to contact us at <a href=\"mailto:[Contact Email]\" style=\"color: #4F46E5; text-decoration: none;\">[Contact Email]</a>.</p>             </td>           </tr>          </table>        </td>     </tr>   </table>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3664,
+        -688
+      ],
+      "id": "4eb429e8-5fd4-4e9b-80d0-68a55b5bce90",
+      "name": "Invite to Interview",
+      "webhookId": "048c5078-abdf-49c1-b865-d0c53be432b5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a44b2343-3f40-4703-a4ed-7314c1754e22",
+              "name": "Applied At",
+              "value": "={{ $('Current Application').item.json[\"Applied At\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "b92c07c5-3419-4058-8144-a8f29368efc8",
+              "name": "Name",
+              "value": "={{ $('Current Application').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "5e29cf08-fce4-4a29-bc9b-9514643b8f52",
+              "name": "Email",
+              "value": "={{ $('Current Application').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "b556b03a-2082-4a7c-9c5d-515b8ed0923b",
+              "name": "Position",
+              "value": "={{ $('Current Application').item.json.Position }}",
+              "type": "string"
+            },
+            {
+              "id": "84a577ef-00ff-4d2a-a230-194d05e09a61",
+              "name": "CvFileId",
+              "value": "={{ $('Current Application').item.json.CvFileId }}",
+              "type": "string"
+            },
+            {
+              "id": "0d54bd4e-024b-4f7e-9800-b8f5f6a98395",
+              "name": "problem",
+              "value": "=An error happened in {{ $prevNode.name }} : {{ $json.error?message || $json.error || \"Unknown Error\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3072,
+        320
+      ],
+      "id": "c0f80ffb-ded0-4335-bb16-2934da01703a",
+      "name": "Describe AI Failure"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8683bb1e-816a-45c3-86b4-d5f1a482c740",
+              "name": "CvFileId",
+              "value": "={{ $('Current Application').item.json.CvFileId }}",
+              "type": "string"
+            },
+            {
+              "id": "7e452f5b-19bc-4427-aa1b-241f6578c6ca",
+              "name": "Name",
+              "value": "={{ $('Current Application').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "eb5ce2e8-6c57-4f4e-b020-d2e654c9aab2",
+              "name": "Email",
+              "value": "={{ $('Current Application').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "e2711ae6-859c-4cdd-a56b-c0e7f15da4c6",
+              "name": "Position",
+              "value": "={{ $('Current Application').item.json.Position }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3440,
+        96
+      ],
+      "id": "3ce1a1fc-195c-482f-a909-200c3c029015",
+      "name": "Manual Review Info"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Applied Data "
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "CV File ID": "={{ $('Current Application').item.json.CvFileId }}",
+            "Status": "new",
+            "Evaluated At": "={{ $now }}",
+            "Problems": "={{ $('Describe AI Failure').item.problem }}"
+          },
+          "matchingColumns": [
+            "CV File ID"
+          ],
+          "schema": [
+            {
+              "id": "Applied At",
+              "displayName": "Applied At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Position",
+              "displayName": "Position",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Motivation",
+              "displayName": "Motivation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "CV File ID",
+              "displayName": "CV File ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CV Link",
+              "displayName": "CV Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Years Experience",
+              "displayName": "Years Experience",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Top Skills",
+              "displayName": "Top Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Matched",
+              "displayName": "Matched",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Missing",
+              "displayName": "Missing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Read Method",
+              "displayName": "Read Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Problems",
+              "displayName": "Problems",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Evaluated At",
+              "displayName": "Evaluated At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3664,
+        96
+      ],
+      "id": "01559e55-dafe-44b3-9a58-dc6269a20a84",
+      "name": "Mark For Manual Review"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3904,
+        384
+      ],
+      "id": "d1ec334d-00bc-405c-8d48-8bde96396674",
+      "name": "Notify HR Manual Review",
+      "webhookId": "23cafd5e-2a1a-45c9-a39b-365d0d8e2ec9",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SENDTO",
+        "subject": "Border Line Candidate",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>Candidate Evaluation Brief - Borderline Case</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f4f6f9;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 20px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f4f6f9;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f9; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"Here is a modern, clean HTML email template designed specifically for sending a **borderline candidate evaluation** to HR. It highlights key strengths alongside area concerns to facilitate a clear decision.  ```html <!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>Borderline Candidate Evaluation</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f4f6f9;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 20px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f4f6f9;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f9; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);\">                      <!-- Header Banner -->           <tr>             <td align=\"center\" style=\"background-color: #0F172A; padding: 36px 20px;\">               <h1 style=\"color: #ffffff; font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.5px;\">Candidate Review & Feedback</h1>               <p style=\"color: #94A3B8; font-size: 14px; margin: 6px 0 0 0;\">Position: [Job Title]</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 36px 40px; color: #334155;\">               <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 16px 0; color: #1E293B;\">                 Hi <strong>[HR Name / Team]</strong>,               </p>               <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #475569;\">                 I have completed the evaluation for <strong>[Candidate Name]</strong> for the <strong>[Job Title]</strong> role. Overall, this is a <strong>borderline case</strong> requiring further alignment before we make a final decision.               </p>                <!-- Candidate Summary Card -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; margin: 0 0 24px 0;\">                 <tr>                   <td style=\"padding: 20px;\">                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td style=\"padding: 4px 0; font-size: 14px; color: #64748B; width: 140px;\"><strong>Candidate Name:</strong></td>                         <td style=\"padding: 4px 0; font-size: 14px; color: #1E293B;\">[Candidate Name]</td>                       </tr>                       <tr>                         <td style=\"padding: 4px 0; font-size: 14px; color: #64748B;\"><strong>Assessment Status:</strong></td>                         <td style=\"padding: 4px 0; font-size: 14px; color: #1E293B;\">                           <span style=\"background-color: #FEF3C7; color: #92400E; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;\">Borderline / Pending Review</span>                         </td>                       </tr>                     </table>                   </td>                 </tr>               </table>                <!-- Two Column Pros / Concerns -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 24px 0;\">                 <tr>                   <!-- Strengths -->                   <td width=\"48%\" valign=\"top\" style=\"background-color: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 8px; padding: 16px;\">                     <p style=\"font-size: 13px; font-weight: 700; text-transform: uppercase; color: #166534; margin: 0 0 8px 0;\">Key Strengths</p>                     <ul style=\"margin: 0; padding-left: 18px; font-size: 13px; color: #15803D; line-height: 1.5;\">                       <li style=\"margin-bottom: 6px;\">[Strength 1, e.g., Solid domain knowledge]</li>                       <li style=\"margin-bottom: 6px;\">[Strength 2, e.g., Good communication]</li>                       <li>[Strength 3]</li>                     </ul>                   </td>                   <td width=\"4%\">&nbsp;</td>                   <!-- Concerns -->                   <td width=\"48%\" valign=\"top\" style=\"background-color: #FEF2F2; border: 1px solid #FEE2E2; border-radius: 8px; padding: 16px;\">                     <p style=\"font-size: 13px; font-weight: 700; text-transform: uppercase; color: #991B1B; margin: 0 0 8px 0;\">Key Concerns</p>                     <ul style=\"margin: 0; padding-left: 18px; font-size: 13px; color: #B91C1C; line-height: 1.5;\">                       <li style=\"margin-bottom: 6px;\">[Concern 1, e.g., Gaps in advanced tech stack]</li>                       <li style=\"margin-bottom: 6px;\">[Concern 2, e.g., Below expected senior experience]</li>                       <li>[Concern 3]</li>                     </ul>                   </td>                 </tr>               </table>                <!-- Suggested Next Steps Box -->               <p style=\"font-size: 15px; font-weight: 600; color: #1E293B; margin: 0 0 10px 0;\">Recommended Next Steps:</p>               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border-left: 4px solid #F59E0B; border-radius: 4px; margin: 0 0 28px 0;\">                 <tr>                   <td style=\"padding: 16px 20px; font-size: 14px; color: #334155; line-height: 1.5;\">                     <p style=\"margin: 0 0 8px 0;\">I suggest one of the following options before moving forward:</p>                     <ol style=\"margin: 0; padding-left: 20px; line-height: 1.5;\">                       <li>Schedule a brief 15-minute sync between us to discuss trade-offs.</li>                       <li>Conduct a follow-up focused assessment round on [Specific Skill/Area].</li>                       <li>Consider for a different/junior level role if suitable.</li>                     </ol>                   </td>                 </tr>               </table>                <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 20px 0; color: #475569;\">                 Let me know how you would like to proceed.               </p>                <p style=\"font-size: 15px; line-height: 1.6; margin: 28px 0 0 0; color: #1E293B;\">                 Best regards,<br>                 <strong>[Your Name]</strong><br>                 <span style=\"color: #64748B; font-size: 13px;\">[Your Title]</span>               </p>             </td>           </tr>            <!-- Footer -->           <tr>             <td align=\"center\" style=\"background-color: #F8FAFC; padding: 20px; border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 12px;\">               <p style=\"margin: 0;\">Internal HR & Recruitment Feedback • Confidential</p>             </td>           </tr>          </table>        </td>     </tr>   </table>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3776,
+        -496
+      ],
+      "id": "4c581229-13db-4ad5-b879-ca5a64b6d2c5",
+      "name": "Flag Border Line For HR",
+      "webhookId": "817f1b90-9ae3-41ec-aeb6-b1690e8b142b"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract CV Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe AI Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Application": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV Text (OCR)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Readable Pdf": {
+      "main": [
+        [
+          {
+            "node": "CV Text (PDF)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OCR Scanned CV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR Scanned CV": {
+      "main": [
+        [
+          {
+            "node": "CV Text (OCR)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe AI Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract CV Text": {
+      "main": [
+        [
+          {
+            "node": "Readable Pdf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current Application": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Application": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Current Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CV Text (PDF)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scoring Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Score Candidate",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Candidate": {
+      "main": [
+        [
+          {
+            "node": "Validate Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe AI Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluation Schema (Auto-Fix)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Score Candidate",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Evaluation Schema (Auto-Fix)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Evaluation": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Desicion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Manual Review Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Desicion": {
+      "main": [
+        [
+          {
+            "node": "Invite to Interview",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag Border Line For HR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Polite Decline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Breif HR": {
+      "main": [
+        [
+          {
+            "node": "Save Result To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Result To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invite to Interview": {
+      "main": [
+        [
+          {
+            "node": "Breif HR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Polite Decline": {
+      "main": [
+        [
+          {
+            "node": "Save Result To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Review Info": {
+      "main": [
+        [
+          {
+            "node": "Mark For Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe AI Failure": {
+      "main": [
+        [
+          {
+            "node": "Manual Review Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Score Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Describe AI Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark For Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Notify HR Manual Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag Border Line For HR": {
+      "main": [
+        [
+          {
+            "node": "Save Result To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify HR Manual Review": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "I86CzV3Qu0HLoW5v",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "nodeGroups": []
+}

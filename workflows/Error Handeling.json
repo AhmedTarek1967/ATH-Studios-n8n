@@ -1,0 +1,912 @@
+{
+  "name": "Error Handeling",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -144
+      ],
+      "id": "4c51d6a4-80a8-40af-9712-0b7613733f42",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "content": "there is only 5 types of error\ncritical or warning \n\nif critical notify sys admin\n\nif warning log in sheet and dont warn sys admin",
+        "height": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -208
+      ],
+      "id": "bb97cd0c-1d86-4e53-8e8b-41d90f62df31",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "2nd wf \n\nBiref for the admin all the errors in the past 24h\n"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        64
+      ],
+      "id": "5201077b-f021-44f3-b936-f78b6cdb6fe1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "3rd \nMake sure that the 2nd wf Works in his time "
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        288
+      ],
+      "id": "4aae747c-e11c-4e5b-86b0-392146634bfd",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turn the raw error into a classified record: what broke, how bad it is, and what to do.\nconst e = $input.first().json;\nconst message = String(e.execution?.error?.message || e.trigger?.error?.message || 'No error message');\nconst description = String(e.execution?.error?.description || e.trigger?.error?.description || '');\nconst workflow = e.workflow?.name || 'Unknown workflow';\nconst node = e.execution?.lastNodeExecuted || e.trigger?.node?.name || 'Trigger';\nconst text = (message + ' ' + description).toLowerCase();\n \n// First matching rule wins, so the most specific rules come first.\nconst rules = [\n  { type: 'auth', severity: 'critical',\n    pattern: /401|403|unauthori[sz]ed|forbidden|invalid_grant|invalid credentials|token (has )?expired|reauthori|access denied/,\n    fix: 'Reconnect the credential used by this node (Credentials, then Reconnect), then retry the execution. Retrying alone will not help.' },\n  { type: 'rate_limit', severity: 'warning',\n    pattern: /429|rate limit|too many requests|quota|resource has been exhausted/,\n    fix: 'Temporary. The next scheduled run usually succeeds. If it keeps happening, run the batch less often or upgrade the API plan.' },\n  { type: 'network', severity: 'warning',\n    pattern: /timeout|timed out|etimedout|econnreset|econnrefused|enotfound|socket hang up|\\b50[234]\\b|service unavailable|bad gateway/,\n    fix: 'Temporary network or service problem. Retry the execution; check the service status page if it repeats.' },\n  { type: 'ai_output', severity: 'warning',\n    pattern: /output parser|could not parse|parseable|unexpected token|json|schema/,\n    fix: 'The AI returned an unexpected format. Retry once; if it repeats, tighten the prompt or the output schema.' },\n  { type: 'data', severity: 'critical',\n    pattern: /cannot read propert|undefined|is not defined|not found|no column|missing|invalid syntax|expression|does not exist/,\n    fix: 'Data or workflow bug. Open the execution, find the input that broke this node, fix the data or the expression, then retry.' },\n];\nconst rule = rules.find(r => r.pattern.test(text)) ||\n  { type: 'unknown', severity: 'critical', fix: 'Unrecognised error. Open the execution and read the full error.' };\n \n// Business rule: anything failing in Intake affects candidates directly, so it is always critical.\nconst severity = /intake/i.test(workflow) ? 'critical' : rule.severity;\n \nreturn [{ json: {\n  time: $now.setZone('Africa/Cairo').toFormat('yyyy-MM-dd HH:mm'),\n  epochMinute: Math.floor(Date.now() / 60000),\n  workflow, node, type: rule.type, severity,\n  message: message.slice(0, 500), fix: rule.fix,\n  executionId: String(e.execution?.id ?? ''),\n  executionUrl: e.execution?.url || '',\n  fingerprint: [workflow, node, rule.type].join(' | '),\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        -144
+      ],
+      "id": "efebb7ae-bee9-4256-97a2-3c6dacd48403",
+      "name": "Classify Error"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        80
+      ],
+      "id": "004b6e51-79fb-49eb-a800-d08931d3335c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -96,
+        304
+      ],
+      "id": "bb3889bd-3dd9-44e5-9281-f38a154e7b81",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Log Application"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time": "={{ $now }}",
+            "type": "afsdsadfkjfsak",
+            "severity": "fasdfnsj",
+            "message": "asdnfkjsd",
+            "fix": "fadsfs"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "epochMinute",
+              "displayName": "epochMinute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "node",
+              "displayName": "node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fix",
+              "displayName": "fix",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "executionUrl",
+              "displayName": "executionUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "alerted",
+              "displayName": "alerted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sendNow",
+              "displayName": "sendNow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        288
+      ],
+      "id": "31915fc6-34db-4de8-886b-a618adc9a045",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Log Application"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        -144
+      ],
+      "id": "c08bdad8-1470-40a8-aab0-9fc715e68333",
+      "name": "Get Recent Alerts",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ALERT THROTTLING: one email per problem per hour, not one per failure.\nconst err = $('Classify Error').first().json;\nconst WINDOW_MINUTES = 60;\nconst num = v => Number(String(v ?? '').replace(/,/g, ''));\n \nconst alertedRecently = $input.all().some(r =>\n  r.json.Fingerprint === err.fingerprint &&\n  r.json.Alerted === 'yes' &&\n  err.epochMinute - num(r.json['Epoch Minute']) < WINDOW_MINUTES);\n \n// Critical errors email now (unless throttled); warnings wait for the daily digest.\nlet alerted = 'digest only';\nif (err.severity === 'critical') alerted = alertedRecently ? 'throttled' : 'yes';\n \nreturn [{ json: { ...err, alerted, sendNow: alerted === 'yes' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -144
+      ],
+      "id": "b7a74931-73c2-40db-8462-670027bfbbfc",
+      "name": "Check Throttle"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Log Application"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "time": "={{ $json.time }}",
+            "epochMinute": "={{ $json.epochMinute }}",
+            "workflow": "={{ $json.workflow }}",
+            "node": "={{ $json.node }}",
+            "type": "={{ $json.type }}",
+            "severity": "={{ $json.severity }}",
+            "message": "={{ $json.message }}",
+            "fix": "={{ $json.fix }}",
+            "executionId": "={{ $json.executionId }}",
+            "executionUrl": "={{ $json.executionUrl }}",
+            "fingerprint": "={{ $json.fingerprint }}",
+            "alerted": "={{ $json.alerted }}",
+            "sendNow": "={{ $json.sendNow }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "time",
+              "displayName": "time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "epochMinute",
+              "displayName": "epochMinute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "node",
+              "displayName": "node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fix",
+              "displayName": "fix",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "executionUrl",
+              "displayName": "executionUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fingerprint",
+              "displayName": "fingerprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "alerted",
+              "displayName": "alerted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sendNow",
+              "displayName": "sendNow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        -144
+      ],
+      "id": "3722a443-27b8-4d35-8c5d-faba1a5ee822",
+      "name": "Append row in sheet1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23c01a44-67ea-48fe-a71a-2d04b217db11",
+              "leftValue": "={{ $json.sendNow }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1024,
+        -144
+      ],
+      "id": "a85c8ee7-a5ac-4f8e-accf-b40b89d84c05",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SENDTO",
+        "subject": "Alert Admin ",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>Critical System Alert</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f8fafc;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 24px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f8fafc;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);\">                      <!-- Header Banner (Critical Alert Theme) -->           <tr>             <td align=\"center\" style=\"background-color: #DC2626; padding: 36px 20px;\">               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">                 <tr>                   <td align=\"center\" style=\"background-color: rgba(255, 255, 255, 0.2); width: 48px; height: 48px; border-radius: 50%; font-size: 24px; color: #ffffff; line-height: 48px;\">                     ⚠️                   </td>                 </tr>               </table>               <h1 style=\"color: #ffffff; font-size: 22px; font-weight: 700; margin: 12px 0 0 0; letter-spacing: -0.5px;\">CRITICAL SYSTEM ALERT</h1>               <p style=\"color: #FEE2E2; font-size: 14px; margin: 4px 0 0 0;\">Immediate action required by System Administrator</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 36px 40px; color: #334155;\">               <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 16px 0; color: #1E293B;\">                 Hello <strong>System Admin</strong>,               </p>               <p style=\"font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #475569;\">                 An automated monitoring hook detected a critical exception requiring your attention. Below are the execution error details:               </p>                <!-- Incident Details Card -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; margin: 0 0 24px 0;\">                 <tr>                   <td style=\"padding: 20px;\">                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td style=\"padding: 6px 0; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #991B1B; width: 110px;\">Severity:</td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #991B1B;\">                           <span style=\"background-color: #DC2626; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;\">CRITICAL</span>                         </td>                       </tr>                       <tr>                         <td style=\"padding: 6px 0; font-size: 13px; font-weight: 700; text-transform: uppercase; color: #991B1B;\">Message:</td>                         <td style=\"padding: 6px 0; font-size: 14px; color: #1E293B; font-family: monospace;\">Example Error Message</td>                       </tr>                     </table>                   </td>                 </tr>               </table>                <!-- Remediation / Fix Instruction Box -->               <p style=\"font-size: 14px; font-weight: 600; color: #1E293B; margin: 0 0 8px 0;\">Recommended Action / Fix:</p>               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8FAFC; border-left: 4px solid #DC2626; border-radius: 4px; margin: 0 0 28px 0;\">                 <tr>                   <td style=\"padding: 16px 20px; font-size: 14px; color: #334155; line-height: 1.5; font-family: monospace;\">                     Unrecognised error. Open the execution and read the full error.                   </td>                 </tr>               </table>                <!-- Action CTA Button -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 28px 0;\">                 <tr>                   <td align=\"center\">                     <a href=\"{{ $json.executionUrl }}\" target=\"_blank\" style=\"background-color: #DC2626; color: #ffffff; display: inline-block; font-size: 15px; font-weight: 600; padding: 12px 28px; text-decoration: none; border-radius: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);\">Open Execution Details</a>                   </td>                 </tr>               </table>                <p style=\"font-size: 14px; line-height: 1.5; margin: 0; color: #64748B;\">                 This is an automated alert generated by your monitoring and workflow infrastructure. Please do not reply directly to this email.               </p>             </td>           </tr>            <!-- Footer -->           <tr>             <td align=\"center\" style=\"background-color: #F8FAFC; padding: 20px; border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 12px;\">               <p style=\"margin: 0;\">Automated System Monitoring &bull; Confidential Infrastructure Alert</p>             </td>           </tr>          </table>        </td>     </tr>   </table>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        -160
+      ],
+      "id": "cc54265c-fef7-4cc4-a70d-4b0c0fc880d4",
+      "name": "Alert Admin",
+      "webhookId": "d1f60255-e554-4f96-9f83-97fa2f090bd2"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SENDTO",
+        "subject": "Daily Digest",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>24-Hour System Error Brief</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #f8fafc;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 24px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #f8fafc;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);\">                      <!-- Header Banner -->           <tr>             <td align=\"center\" style=\"background-color: #0F172A; padding: 32px 20px;\">               <h1 style=\"color: #ffffff; font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px;\">24-Hour System Error Brief</h1>               <p style=\"color: #94A3B8; font-size: 13px; margin: 6px 0 0 0;\">Daily Automated Audit &bull; Past 24 Hours</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 32px 36px; color: #334155;\">               <p style=\"font-size: 15px; line-height: 1.5; margin: 0 0 16px 0; color: #1E293B;\">                 Hello <strong>System Admin</strong>,               </p>               <p style=\"font-size: 14px; line-height: 1.5; margin: 0 0 24px 0; color: #475569;\">                 Here is the concise activity brief summarizing all system errors logged across your workflows and infrastructure over the past 24 hours.               </p>                <!-- Metrics Summary Row -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 24px 0;\">                 <tr>                   <td width=\"31%\" align=\"center\" style=\"background-color: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color: #991B1B; margin: 0 0 4px 0;\">Critical</p>                     <p style=\"font-size: 22px; font-weight: 700; color: #DC2626; margin: 0;\">1</p>                   </td>                   <td width=\"3.5%\">&nbsp;</td>                   <td width=\"31%\" align=\"center\" style=\"background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color: #B45309; margin: 0 0 4px 0;\">Warnings</p>                     <p style=\"font-size: 22px; font-weight: 700; color: #D97706; margin: 0;\">4</p>                   </td>                   <td width=\"3.5%\">&nbsp;</td>                   <td width=\"31%\" align=\"center\" style=\"background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748B; margin: 0 0 4px 0;\">Total Events</p>                     <p style=\"font-size: 22px; font-weight: 700; color: #1E293B; margin: 0;\">5</p>                   </td>                 </tr>               </table>                <!-- Error Log Table -->               <p style=\"font-size: 13px; font-weight: 700; text-transform: uppercase; color: #64748B; margin: 0 0 10px 0; letter-spacing: 0.5px;\">Recent Exceptions Log</p>                              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden; margin: 0 0 24px 0;\">                 <!-- Error Item 1 (Critical) -->                 <tr>                   <td style=\"padding: 12px 16px; border-bottom: 1px solid #E2E8F0; background-color: #ffffff;\">                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td>                           <span style=\"background-color: #DC2626; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; text-transform: uppercase;\">Critical</span>                           <span style=\"font-size: 12px; color: #64748B; margin-left: 8px;\">14:22 UTC</span>                         </td>                       </tr>                       <tr>                         <td style=\"padding-top: 4px; font-family: monospace; font-size: 13px; color: #1E293B;\">                           Example Error Message                         </td>                       </tr>                       <tr>                         <td style=\"padding-top: 2px; font-size: 12px; color: #64748B;\">                           <strong>Fix:</strong> Unrecognised error. Open execution to read full details.                         </td>                       </tr>                     </table>                   </td>                 </tr>                 <!-- Error Item 2 (Warning Example) -->                 <tr>                   <td style=\"padding: 12px 16px; background-color: #F8FAFC;\">                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td>                           <span style=\"background-color: #D97706; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; text-transform: uppercase;\">Warning</span>                           <span style=\"font-size: 12px; color: #64748B; margin-left: 8px;\">09:15 UTC</span>                         </td>                       </tr>                       <tr>                         <td style=\"padding-top: 4px; font-family: monospace; font-size: 13px; color: #1E293B;\">                           API rate limit threshold approaching (85%)                         </td>                       </tr>                       <tr>                         <td style=\"padding-top: 2px; font-size: 12px; color: #64748B;\">                           <strong>Fix:</strong> Monitor usage or upgrade service tier.                         </td>                       </tr>                     </table>                   </td>                 </tr>               </table>                <!-- Action CTA -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 20px 0;\">                 <tr>                   <td align=\"center\">                     <a href=\"{{ $('Get Error Log').item.json.executionUrl }}\" target=\"_blank\" style=\"background-color: #0F172A; color: #ffffff; display: inline-block; font-size: 14px; font-weight: 600; padding: 12px 24px; text-decoration: none; border-radius: 6px;\">View Full Error Dashboard</a>                   </td>                 </tr>               </table>              </td>           </tr>            <!-- Footer -->           <tr>             <td align=\"center\" style=\"background-color: #F8FAFC; padding: 16px; border-top: 1px solid #E2E8F0; color: #94A3B8; font-size: 11px;\">               <p style=\"margin: 0;\">Automated 24-Hour System Digest &bull; Confidential</p>             </td>           </tr>          </table>        </td>     </tr>   </table>  </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "73d2fa7a-82d6-4f0c-b72b-3f2a971c2e9d",
+      "name": "Send Daily Digest",
+      "webhookId": "357a0d97-4221-4c32-a546-ac71c9672a3e"
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_SENDTO",
+        "subject": "System Heartbeat Alert",
+        "message": "=<!DOCTYPE html> <html lang=\"en\"> <head>   <meta charset=\"UTF-8\">   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">   <title>System Heartbeat & Health Brief</title>   <style>     body, table, td, a {       -webkit-text-size-adjust: 100%;       -ms-text-size-adjust: 100%;     }     table, td {       mso-table-lspace: 0pt;       mso-table-rspace: 0pt;     }     body {       height: 100% !important;       margin: 0 !important;       padding: 0 !important;       width: 100% !important;       background-color: #090D16;       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;     }     @media screen and (max-width: 600px) {       .email-container {         width: 100% !important;         padding: 10px !important;       }       .content-padding {         padding: 24px !important;       }     }   </style> </head> <body style=\"margin: 0; padding: 0; background-color: #090D16;\">    <!-- Outer Background Table -->   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #090D16; padding: 40px 0;\">     <tr>       <td align=\"center\">                  <!-- Main Email Container -->         <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"email-container\" style=\"background-color: #111827; border-radius: 12px; overflow: hidden; border: 1px solid #1F2937; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);\">                      <!-- Header Banner (Heartbeat Pulse Theme) -->           <tr>             <td align=\"center\" style=\"background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 36px 20px; border-bottom: 1px solid #1F2937;\">               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">                 <tr>                   <td align=\"center\" style=\"background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); width: 50px; height: 50px; border-radius: 50%; font-size: 22px; color: #10B981; line-height: 50px;\">                     🟢                   </td>                 </tr>               </table>               <h1 style=\"color: #F9FAFB; font-size: 20px; font-weight: 700; margin: 12px 0 4px 0; letter-spacing: -0.5px;\">SYSTEM HEARTBEAT BRIEF</h1>               <p style=\"color: #9CA3AF; font-size: 13px; margin: 0;\">24-Hour Automated Infrastructure Pulse &bull; Past 24 Hours</p>             </td>           </tr>            <!-- Content Body -->           <tr>             <td class=\"content-padding\" style=\"padding: 32px 36px; color: #E5E7EB;\">               <p style=\"font-size: 15px; line-height: 1.5; margin: 0 0 12px 0; color: #F9FAFB;\">                 Hello <strong>System Admin</strong>,               </p>               <p style=\"font-size: 14px; line-height: 1.5; margin: 0 0 24px 0; color: #9CA3AF;\">                 Here is your scheduled 24-hour heartbeat check summarizing all system events, errors, and health signals across your infrastructure.               </p>                <!-- Heartbeat Status Bar -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #1F2937; border-radius: 8px; margin: 0 0 24px 0;\">                 <tr>                   <td style=\"padding: 16px 20px;\">                     <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">                       <tr>                         <td style=\"font-size: 13px; color: #9CA3AF; font-weight: 600;\">System Pulse Status:</td>                         <td align=\"right\" style=\"font-size: 13px; color: #EF4444; font-weight: 700;\">1 Critical Incident Detected</td>                       </tr>                     </table>                   </td>                 </tr>               </table>                <!-- Metrics Summary Row -->               <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin: 0 0 24px 0;\">                 <tr>                   <td width=\"31%\" align=\"center\" style=\"background-color: #1A1C23; border: 1px solid #7F1D1D; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color: #FCA5A5; margin: 0 0 4px 0;\">Critical</p>                     <p style=\"font-size: 22px; font-weight: 700; color: #EF4444; margin: 0;\">1</p>                   </td>                   <td width=\"3.5%\">&nbsp;</td>                   <td width=\"31%\" align=\"center\" style=\"background-color: #1A1C23; border: 1px solid #78350F; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color: #FDE68A; margin: 0 0 4px 0;\">Warnings</p>                     <p style=\"font-size: 22px; font-weight: 700; color: #F59E0B; margin: 0;\">4</p>                   </td>                   <td width=\"3.5%\">&nbsp;</td>                   <td width=\"31%\" align=\"center\" style=\"background-color: #1A1C23; border: 1px solid #374151; border-radius: 8px; padding: 14px 10px;\">                     <p style=\"font-size: 11px; font-weight: 700; text-transform: uppercase; color:",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        288
+      ],
+      "id": "7111de0d-42d5-42a1-b9cf-bb2f976f6e1d",
+      "name": "HeartBeat Alert",
+      "webhookId": "6dda5d19-f69f-48f8-90cd-9496da241ee7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "95df7025-dd14-4cc0-ab39-ec3b674da527",
+              "leftValue": "={{ $json.isStuck }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        304
+      ],
+      "id": "c514de36-ea7d-4799-82f8-8c826723e194",
+      "name": "Queue Stuck?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// HEARTBEAT (dead-man's switch): alerts when nothing happened, which no Error Trigger can see.\n// If applications wait in Status \"new\" for too long, the batch workflow is not running.\nconst MAX_WAIT_HOURS = 3;\nconst now = DateTime.now().setZone('Africa/Cairo');\nconst parse = s => {\n  s = String(s || '').trim();\n  for (const f of ['yyyy-MM-dd HH:mm', 'yyyy-MM-dd HH:mm:ss', 'M/d/yyyy H:mm:ss', 'M/d/yyyy H:mm']) {\n    const d = DateTime.fromFormat(s, f, { zone: 'Africa/Cairo' });\n    if (d.isValid) return d;\n  }\n  const t = Date.parse(s);\n  return isNaN(t) ? null : DateTime.fromMillis(t);\n};\n \nconst stuck = $input.all().map(i => i.json)\n  .filter(r => String(r.Status || '').toLowerCase() === 'new')\n  .map(r => ({ name: r.Name, position: r.Position, applied: parse(r['Applied At']) }))\n  .filter(r => r.applied && now.diff(r.applied, 'hours').hours > MAX_WAIT_HOURS);\n \nconst oldestHours = stuck.length ? Math.round(Math.max(...stuck.map(r => now.diff(r.applied, 'hours').hours))) : 0;\nreturn [{ json: {\n  isStuck: stuck.length > 0,\n  stuckCount: stuck.length,\n  oldestHours,\n  listHtml: stuck.slice(0, 10).map(r => `<li>${r.name} (${r.position}), applied ${r.applied.toFormat('yyyy-MM-dd HH:mm')}</li>`).join(''),\n  time: now.toFormat('yyyy-MM-dd HH:mm'),\n  epochMinute: Math.floor(Date.now() / 60000),\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        304
+      ],
+      "id": "5b894d15-c787-42ab-a98e-74b6f408b9ad",
+      "name": "Find Stuck Applications"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Log Application"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "type",
+              "lookupValue": "new"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        304
+      ],
+      "id": "fc845d30-2fa0-4bdc-919c-64af6177fd29",
+      "name": "Get Waiting Applications",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_ID",
+          "mode": "list",
+          "cachedResultName": "Log Application"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        80
+      ],
+      "id": "36b5bbba-12a7-42c6-b390-94897fec9c2b",
+      "name": "Get Error Log"
+    },
+    {
+      "parameters": {
+        "jsCode": "// DAILY DIGEST: one summary of the last 24 hours plus everything still open.\nconst num = v => Number(String(v ?? '').replace(/,/g, ''));\nconst nowMin = Math.floor(Date.now() / 60000);\nconst rows = $input.all().map(i => i.json).filter(r => r.Fingerprint);\nconst last24 = rows.filter(r => nowMin - num(r['Epoch Minute']) <= 1440);\nconst open = rows.filter(r => String(r.Status || '').toLowerCase() === 'open');\n \nconst count = (list, key) => list.reduce((acc, r) => { acc[r[key]] = (acc[r[key]] || 0) + 1; return acc; }, {});\nconst byType = Object.entries(count(last24, 'Type')).sort((a, b) => b[1] - a[1]);\nconst groups = Object.values(open.reduce((acc, r) => {\n  acc[r.Fingerprint] = acc[r.Fingerprint] || { ...r, times: 0 };\n  acc[r.Fingerprint].times++;\n  return acc;\n}, {}));\n \nconst esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst typeRows = byType.map(([t, n]) => `<li><b>${esc(t)}</b>: ${n}</li>`).join('') || '<li>None</li>';\nconst openRows = groups.map(g =>\n  `<li><b>${esc(g.Workflow)}</b> at ${esc(g.Node)} (${esc(g.Type)}, ${esc(g.Severity)}) &times;${g.times}<br><span style=\"color:#6b7280;\">${esc(g.Message)}</span><br><i>${esc(g['Suggested Fix'])}</i></li>`).join('');\n \nreturn [{ json: {\n  hasNews: last24.length > 0 || open.length > 0,\n  total24h: last24.length,\n  critical24h: last24.filter(r => r.Severity === 'critical').length,\n  openCount: open.length,\n  typeListHtml: typeRows,\n  openListHtml: openRows || '<li>Nothing open. Good job.</li>',\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        80
+      ],
+      "id": "0a5fcf14-ddd8-46ca-a1d7-626cb28cd5a1",
+      "name": "Build Digest"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d2d906e9-5261-4dc0-8e5a-19e60597ce41",
+              "leftValue": "={{ $json.hasNew }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        80
+      ],
+      "id": "a57c717f-1467-42bf-8f20-7094e35ba114",
+      "name": "Anything to Report?"
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Classify Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Error": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get Waiting Applications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Alerts": {
+      "main": [
+        [
+          {
+            "node": "Check Throttle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Throttle": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Alert Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HeartBeat Alert": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue Stuck?": {
+      "main": [
+        [
+          {
+            "node": "HeartBeat Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HeartBeat Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Stuck Applications": {
+      "main": [
+        [
+          {
+            "node": "Queue Stuck?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Waiting Applications": {
+      "main": [
+        [
+          {
+            "node": "Find Stuck Applications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Error Log": {
+      "main": [
+        [
+          {
+            "node": "Build Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Digest": {
+      "main": [
+        [
+          {
+            "node": "Anything to Report?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to Report?": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Digest",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Daily Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "nodeGroups": []
+}

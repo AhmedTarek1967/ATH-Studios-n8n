@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ATH Studios | n8n Automation Projects</title>
+<style>
+:root{--bg:#fafaf7;--card:#fff;--text:#1c1c1a;--muted:#66665f;--line:#e4e3dc;--accent:#e8590c;--on:#d7f5e3;--off:#fde2e2;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#1f1f1d;--text:#f1f0ea;--muted:#a3a29a;--line:#33332f;--on:#12351f;--off:#3d1818;color-scheme:dark}}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:2.2rem;margin:.2em 0}
+h2{margin:2em 0 .6em;font-size:1.4rem}
+p{color:var(--muted)}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;background:var(--line);font-size:.85rem;color:var(--text)}
+.badge.on{background:var(--on)}.badge.off{background:var(--off)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:var(--text);display:block}
+.card h3{margin:0 0 6px;font-size:1.05rem}.card p{margin:0}
+.card:hover{border-color:var(--accent)}
+.btn{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:10px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;border:0;cursor:pointer;font-size:1rem}
+a.disabled{pointer-events:none;opacity:.45}
+#msgs{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;min-height:180px;max-height:360px;overflow-y:auto}
+.me{text-align:right;margin:8px 0;color:var(--accent)}
+.bot{margin:8px 0;white-space:pre-wrap}
+form.row{display:flex;gap:8px;margin-top:10px}
+input#q{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:1rem}
+ol{padding-left:20px;color:var(--muted)}ol li{margin:8px 0}ol b{color:var(--text)}
+footer{margin-top:48px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <span class="badge" id="status">Checking…</span>
+  <h1>ATH Studios</h1>
+  <p>Live automation projects built with n8n: apply for a job, get your CV reviewed by AI, and ask an HR assistant. Everything below runs on real workflows, not a demo.</p>
+</header>
+
+<section>
+  <h2>Choose what you want</h2>
+  <div class="grid">
+    <a class="card" href="#ask"><h3>Ask HR</h3><p>Chat with an assistant that answers from company policy documents.</p></a>
+    <a class="card" href="#try"><h3>Get coached</h3><p>Send your CV and a job post, get a coaching report by email.</p></a>
+    <a class="card" href="#try"><h3>Apply for a job</h3><p>Submit a PDF CV through the intake form.</p></a>
+  </div>
+</section>
+
+<section id="ask">
+  <h2>Try it: Ask HR</h2>
+  <div id="msgs" aria-live="polite"></div>
+  <form class="row" id="ask-form">
+    <input id="q" placeholder="How many leave days do I get?" required autocomplete="off">
+    <button class="btn" style="margin:0">Ask</button>
+  </form>
+</section>
+
+<section id="try">
+  <h2>Try it: Forms</h2>
+  <div class="grid">
+    <div class="card"><h3>Apply for a Job</h3><p>Upload your CV as a PDF. It is validated, saved and logged.</p>
+      <a class="btn" id="applyLink" target="_blank" rel="noopener">Open form</a></div>
+    <div class="card"><h3>Job Application Form</h3><p>Receive a CV coaching report against a job post.</p>
+      <a class="btn" id="coachLink" target="_blank" rel="noopener">Open form</a></div>
+  </div>
+  <p style="font-size:.85rem">The first time, ngrok may show a warning page. Click <b>Visit Site</b>.</p>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <ol>
+    <li><b>Applying to Job:</b> a form takes the application and CV, checks it, and stores it.</li>
+    <li><b>Cv Review:</b> AI reads a CV against a job post and emails a coaching report.</li>
+    <li><b>Rag + Policy Loader:</b> policy documents are loaded into a knowledge base; the chat answers only from them.</li>
+    <li><b>Ai Action:</b> AI-powered processing of the recruitment flow.</li>
+    <li><b>Error Handeling:</b> failures are logged and reported so nothing breaks silently.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Download</h2>
+  <div class="grid">
+    <a class="card" href="workflows/Applying%20to%20Job.json" download><h3>Applying to Job</h3></a>
+    <a class="card" href="workflows/Cv%20Review.json" download><h3>Cv Review</h3></a>
+    <a class="card" href="workflows/Rag.json" download><h3>Rag</h3></a>
+    <a class="card" href="workflows/Policy%20Loader.json" download><h3>Policy Loader</h3></a>
+    <a class="card" href="workflows/Ai%20Action.json" download><h3>Ai Action</h3></a>
+    <a class="card" href="workflows/Error%20Handeling.json" download><h3>Error Handeling</h3></a>
+  </div>
+</section>
+
+<footer>© ATH Studios · Built with n8n, Docker, ngrok and GitHub Pages. Live only while the host machine is online.</footer>
+</div>
+
+<script>
+const CONFIG = {
+  n8nBase: "https://untie-debtor-thaw.ngrok-free.dev",
+  chat: "/webhook/b0b5fad5-f022-4864-ab7c-cf66b8599c10/chat",
+  applyForm: "/form/b4d150ed-a349-4a3e-8976-a4c9a0742a3d",
+  coachForm: "/form/2090c8fb-d661-4383-8048-ad15c2fe7f3a"
+};
+const $ = s => document.querySelector(s);
+const sessionId = crypto.randomUUID();
+const HEADERS = { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" };
+$("#applyLink").href = CONFIG.n8nBase + CONFIG.applyForm;
+$("#coachLink").href = CONFIG.n8nBase + CONFIG.coachForm;
+
+function setStatus(online) {
+  $("#status").textContent = online ? "Online" : "Offline, please try again later";
+  $("#status").className = "badge " + (online ? "on" : "off");
+  document.querySelectorAll("#applyLink, #coachLink").forEach(a => a.classList.toggle("disabled", !online));
+}
+async function checkStatus() {
+  try {
+    await fetch(CONFIG.n8nBase + CONFIG.chat, { method: "POST", headers: HEADERS,
+      body: JSON.stringify({ action: "loadPreviousSession", sessionId }) });
+    setStatus(true);
+  } catch (err) { setStatus(false); }
+}
+checkStatus();
+setInterval(checkStatus, 60000);
+
+function add(cls, text) {
+  const d = document.createElement("div");
+  d.className = cls; d.textContent = text;
+  $("#msgs").append(d); $("#msgs").scrollTop = $("#msgs").scrollHeight;
+  return d;
+}
+$("#ask-form").onsubmit = async e => {
+  e.preventDefault();
+  const q = $("#q").value.trim(); if (!q) return;
+  $("#q").value = "";
+  add("me", q);
+  const bot = add("bot", "…");
+  try {
+    const r = await fetch(CONFIG.n8nBase + CONFIG.chat, { method: "POST", headers: HEADERS,
+      body: JSON.stringify({ action: "sendMessage", sessionId, chatInput: q }) });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    bot.textContent = (await r.json()).output;
+    setStatus(true);
+  } catch (err) {
+    bot.textContent = "The HR assistant is offline right now. Please try again later.";
+    setStatus(false);
+  }
+};
+</script>
+</body>
+</html>
